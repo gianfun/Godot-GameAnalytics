@@ -53,7 +53,6 @@ var url_init
 var url_events
 
 # settings
-var use_gzip = false
 var verbose_log = false
 
 
@@ -78,12 +77,6 @@ func _ready():
 #
 	if os_version == "Windows":
 		os_version = "ios 8.2"
-#
-#	post_to_log("")
-#	post_to_log("-------- GameAnalytics REST V2 -------------")
-#	#-->post_to_log(("Gzip enabled!" if use_gzip else "Gzip disabled!")
-#	post_to_log("--------------------------------------------")
-
 	# 1. init call
 	#init_response, init_response_code = request_init()
 #	var init_response = request_init()
@@ -323,18 +316,12 @@ func submit_events():
 #    if event_list_json is null:
 #        return
 
-	# if gzip enabled
-	if use_gzip:
-		event_list_json = get_gzip_string(event_list_json)
 
 	# create headers with authentication hash
 	var headers = [
 		"Authorization: " +  Marshalls.raw_to_base64(hmac_sha256(event_list_json, secret_key)),
 		"Content-Type: application/json"]
 
-	# if gzip enabled add the encoding header
-	if use_gzip:
-		headers.append('Content-Encoding: gzip')
 
 	# TODO: Fix unused error
 	var _err = requests.connect_to_host(base_url,80)
@@ -534,30 +521,6 @@ static func merge_dir2(target, patch):
         else:
             target[key] = patch[key]
 
-func get_gzip_string(string_for_gzip):
-    var f = File.new()
-
-    f.open_compressed("user://gzip", File.WRITE, File.COMPRESSION_GZIP)
-    #f.store_buffer(string_for_gzip.to_utf8())
-    f.store_string(string_for_gzip)
-    f.close()
-
-    f.open("user://gzip", File.READ)
-    #var enc_text = f.get_buffer(f.get_len())
-    #get_string_from_utf8()
-    var enc_text = f.get_as_text()
-    #var enc_text = f.get_buffer(f.get_len()).get_string_from_utf8()
-    f.close()
-#    var zip_text_file = StringIO()
-#    var zipper = gzip.GzipFile('wb', zip_text_file)
-#    zipper.write(string_for_gzip)
-#    zipper.close()
-#
-#    enc_text = zip_text_file.getvalue()
-    return enc_text
-    pass
-
-
 # add default annotations (will alter the dict by reference)
 #func annotate_event_with_default_values(event_dict):
 func annotate_event_with_default_values():
@@ -617,6 +580,10 @@ func post_to_log(message):
 	print(message)
 	pass
 
+
+
+
+
 func pool_byte_array_from_hex(hex):
 	var out = PoolByteArray()
 
@@ -625,9 +592,6 @@ func pool_byte_array_from_hex(hex):
 		out.append(hex_int)
 
 	return out
-
-
-
 
 # TODO: This sucks, but its what we have right now
 # Returns the hex encoded sha256 hash of buffer
