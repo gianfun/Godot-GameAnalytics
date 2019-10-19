@@ -631,7 +631,7 @@ func hmac_sha256(message, key):
 
 	# Right zero padding if key length < 64
 	while k.size() < 64:
-		k.append(convert_hex_to_dec("00"))
+		k.append(hex_to_int("00"))
 
 	var i = "".to_utf8()
 	var o = "".to_utf8()
@@ -654,7 +654,7 @@ func hmac_sha256(message, key):
 
 	x = 0
 	while x < 64:
-		outer.append(convert_hex_to_dec(z.substr(x, 2)))
+		outer.append(hex_to_int(z.substr(x, 2)))
 		x += 2
 
 	outer = o + outer
@@ -669,21 +669,10 @@ func hmac_sha256(message, key):
 
 	x = 0
 	while x < 64:
-		outer.append(convert_hex_to_dec(z.substr(x, 2)))
+		outer.append(hex_to_int(z.substr(x, 2)))
 		x += 2
 
 	return outer
 
-func convert_hex_to_dec(h):
-	var c = "0123456789ABCDEF"
-
-	h = h.to_upper()
-
-	var r = h.right(1)
-	var l = h.left(1)
-
-	var b0 = c.find(r)
-	var b1 = c.find(l) * 16
-
-	var x = b1 + b0
-	return x
+func hex_to_int(hex):
+	return ("0x" + str(hex)).hex_to_int()
