@@ -616,63 +616,54 @@ func print_verbose(message):
 func post_to_log(message):
 	print(message)
 	pass
-# -- RUN -- #
-#run()
+
+func pool_byte_array_from_hex(hex):
+	var out = PoolByteArray()
+
+	for idx in range(0, hex.length(), 2):
+		var hex_int = ("0x" + hex.substr(idx, 2)).hex_to_int()
+		out.append(hex_int)
+
+	return out
+
+
+
+
+# TODO: This sucks, but its what we have right now
+# Returns the hex encoded sha256 hash of buffer
+func sha256(buffer):
+	var path = "user://__ga__sha256_temp"
+	var file = File.new()
+	file.open(path, File.WRITE)
+	file.store_buffer(buffer)
+	file.close()
+	var sha_hash = file.get_sha256(path)
+
+	Directory.new().remove(path)
+
+	return sha_hash
+
 func hmac_sha256(message, key):
-	var x = 0
-	var k
-
-	if key.length() <= 64:
-		k = key.to_utf8()
-
 	# Hash key if length > 64
-	if key.length() > 64:
-		k =  key.sha256_buffer()
+	if key.length() <= 64:
+		key = key.to_utf8()
+	else:
+		key = key.sha256_buffer()
 
 	# Right zero padding if key length < 64
-	while k.size() < 64:
-		k.append(hex_to_int("00"))
+	while key.size() < 64:
+		key.append(0)
 
-	var i = "".to_utf8()
-	var o = "".to_utf8()
-	var m = message.to_utf8()
-	var s = File.new()
 
-	while x < 64:
-		o.append(k[x] ^ 0x5c)
-		i.append(k[x] ^ 0x36)
-		x += 1
+	var inner_key = PoolByteArray()
+	var outer_key = PoolByteArray()
 
-	var inner = i + m
+	for idx in range(0, 64):
+		outer_key.append(key[idx] ^ 0x5c)
+		inner_key.append(key[idx] ^ 0x36)
 
-	s.open("user://temp", File.WRITE)
-	s.store_buffer(inner)
-	s.close()
-	var z = s.get_sha256("user://temp")
 
-	var outer = "".to_utf8()
+	var inner_hash = pool_byte_array_from_hex(sha256(inner_key + message.to_utf8()))
+	var outer_hash = pool_byte_array_from_hex(sha256(outer_key + inner_hash))
 
-	x = 0
-	while x < 64:
-		outer.append(hex_to_int(z.substr(x, 2)))
-		x += 2
-
-	outer = o + outer
-
-	s.open("user://temp", File.WRITE)
-	s.store_buffer(outer)
-	s.close()
-
-	z = s.get_sha256("user://temp")
-
-	outer = "".to_utf8()
-
-	x = 0
-	while x < 64:
-		outer.append(hex_to_int(z.substr(x, 2)))
-		x += 2
-
-	return outer
-
-func hex_to_int(hex):
-	return ("0x" + str(hex)).hex_to_int()
+	return outer_hash
