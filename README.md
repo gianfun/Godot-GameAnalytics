@@ -62,7 +62,7 @@ NOTE: While testing on my Windows machine, GameAnalytics refused "Windows" as a 
 	if GA.os_version == "Windows":
 		GA.os_version = "android 4.4.4"
  ```
- 
+
 TODO
 
 . Correctly calculate client_ts offset

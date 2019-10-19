@@ -15,14 +15,14 @@ extends Node
 7. add session_end event to queue
 8. submit events in queue
 """
-# From https://github.com/xsellier/godot-uuid
-const UUID = preload("res://uuid.gd")
-# device information
+
+const UUID = preload("uuid.gd")
+
 var DEBUG = false
-var returned
-var response_data
-var response_code
-#var uuid = "000002"
+# var returned
+# var response_data
+# var response_code
+
 var uuid = UUID.v4()
 
 # For some reason GameAnalytics only accepts lower case. Weird but happened to me
@@ -30,22 +30,27 @@ var platform = OS.get_name().to_lower()
 #var os_version = OS.get_name()
 # Couldn't find a way to get OS version yet. Need to adapt for iOS or anything else
 var os_version = "android 4.4.4"
+# warning-ignore:unused_class_variable
 var sdk_version = 'rest api v2'
+# warning-ignore:unused_class_variable
 var device = OS.get_model_name().to_lower()
+# warning-ignore:unused_class_variable
 var manufacturer = OS.get_name().to_lower()
 
 # game information
+# warning-ignore:unused_class_variable
 var build_version = 'alpha 0.0.1'
+# warning-ignore:unused_class_variable
 var engine_version = 'Godot 3.0.2'
 
 # sandbox game keys
-var game_key = "5c6bcb5402204249437fb5a7a80a4959"
-var secret_key = "16813a12f718bc5c620f56944e1abc3ea13ccbac"
+var game_key
+var secret_key
 
 # sandbox API urls
 var base_url = "http://sandbox-api.gameanalytics.com"
-var url_init = "/v2/" + game_key + "/init"
-var url_events = "/v2/" + game_key + "/events"
+var url_init
+var url_events
 
 # settings
 var use_gzip = false
@@ -68,11 +73,11 @@ var requests = HTTPClient.new()
 
 func _ready():
 #	# For some reason, "Windows" is not recognized by GameAnaytics. Guess they only expect mobile platforms
-#	if platform == "Windows":
-#		platform = "ios"
+	if platform == "Windows":
+		platform = "ios"
 #
-#	if os_version == "Windows":
-#		os_version = "ios 8.2"
+	if os_version == "Windows":
+		os_version = "ios 8.2"
 #
 #	post_to_log("")
 #	post_to_log("-------- GameAnalytics REST V2 -------------")
@@ -136,26 +141,6 @@ func _ready():
 	#sys.exit()
 	pass
 
-#func _process(delta):
-#	# Called every frame. Delta is time since last frame.
-#	# Update game logic here.
-#	pass
-#import requests
-## install the requests Python package
-## pip install requests   or   easy_install requests
-#import json
-#import hmac
-#import base64
-#import hashlib
-#import sys
-#from datetime import datetime
-#import calendar
-#import uuid
-#import gzip
-#from StringIO import StringIO
-
-# main entry point
-#func run():
 
 # adding an event to the queue for later submit
 func add_to_event_queue(event_dict):
@@ -179,10 +164,11 @@ func add_to_event_queue(event_dict):
 
 # requesting init URL and returning result
 func request_init():
-		# Get version number on Android. Need something similar for iOS
+	# Get version number on Android. Need something similar for iOS
 	if platform == "android":
 		var output = []
-		var pid = OS.execute("getprop", ["ro.build.version.release"], true, output)
+		# TODO: Why is this not used?
+		var _pid = OS.execute("getprop", ["ro.build.version.release"], true, output)
 		# Trimming new line char at the end
 		output[0] = output[0].substr(0, output[0].length() - 1)
 		os_version = platform + " " + output[0]
@@ -209,7 +195,7 @@ func request_init():
 	print(Marshalls.raw_to_base64(hmac_sha256(init_payload_json, secret_key)))
 	#response_dict = None
 	#status_code = None
-	var response_dict
+	#var response_dict
 	var status_code
 
 	if DEBUG:
@@ -219,7 +205,8 @@ func request_init():
 		print(Marshalls.raw_to_base64(hmac_sha256(init_payload_json, secret_key)))
 
 	#try:
-	var err = requests.connect_to_host(base_url,80)
+	# TODO: Fix unused error
+	var _err = requests.connect_to_host(base_url,80)
 
 		# Wait until resolved and connected
 	while requests.get_status() == HTTPClient.STATUS_CONNECTING or requests.get_status() == HTTPClient.STATUS_RESOLVING:
@@ -279,7 +266,8 @@ func request_init():
 	#status_code = init_response.status_code
 	status_code = requests.get_response_code()
 	#try:
-	response_dict = to_json(init_response)
+	# TODO: Why is this not used?
+	var _response_dict = to_json(init_response)
 #    except:
 #        response_dict = None
 
@@ -348,7 +336,8 @@ func submit_events():
 	if use_gzip:
 		headers.append('Content-Encoding: gzip')
 
-	var err = requests.connect_to_host(base_url,80)
+	# TODO: Fix unused error
+	var _err = requests.connect_to_host(base_url,80)
 
 		# Wait until resolved and connected
 	while requests.get_status() == HTTPClient.STATUS_CONNECTING or requests.get_status() == HTTPClient.STATUS_RESOLVING:
@@ -358,7 +347,8 @@ func submit_events():
 
 
 	#try:
-	var events_response = requests.request(HTTPClient.METHOD_POST, url_events, headers, event_list_json)
+	# TODO: Why is this not used?
+	var _events_response = requests.request(HTTPClient.METHOD_POST, url_events, headers, event_list_json)
 #    except Exception as e:
 #        post_to_log("Submit events request failed!")
 #        post_to_log(e.reason)
@@ -571,16 +561,17 @@ func get_gzip_string(string_for_gzip):
 # add default annotations (will alter the dict by reference)
 #func annotate_event_with_default_values(event_dict):
 func annotate_event_with_default_values():
-	var now_ts = OS.get_datetime()
+	# TODO: Why is this not used?
+	# var now_ts = OS.get_datetime()
 	# datetime.utcnow()
 	# calculate client_ts using offset from server time
 	#var client_ts = calendar.timegm(now_ts.timetuple()) - state_config['client_ts_offset']
 	var client_ts = OS.get_unix_time_from_datetime(OS.get_datetime())
 
 	# TEST IDFA / IDFV
-	#var idfa = 'AEBE52E7-03EE-455A-B3C4-E57283966239'
+	# var idfa = 'AEBE52E7-03EE-455A-B3C4-E57283966239'
 	var idfa = OS.get_unique_id().to_lower()
-	var idfv = 'AEBE52E7-03EE-455A-B3C4-E57283966239'
+	# var idfv = 'AEBE52E7-03EE-455A-B3C4-E57283966239'
 
 	var default_annotations = {
 		'v': 2,                                     # (required: Yes)
@@ -681,7 +672,6 @@ func hmac_sha256(message, key):
 		outer.append(convert_hex_to_dec(z.substr(x, 2)))
 		x += 2
 
-	var mm = outer
 	return outer
 
 func convert_hex_to_dec(h):
