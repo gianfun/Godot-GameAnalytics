@@ -103,7 +103,7 @@ func _ready():
 #	add_to_event_queue(get_test_design_event("player:played_video", 3))
 #
 #	returned = submit_events()
-	
+
 #	# add session start event (user event)
 #	add_to_event_queue(get_test_user_event())
 #
@@ -169,9 +169,9 @@ func add_to_event_queue(event_dict):
 		f.open("user://event_queue", File.READ)
 		state_config['event_queue'] = f.get_var()
 		f.close()
-	
+
 	state_config['event_queue'].append(event_dict)
-	
+
 	#Save to file
 	f.open("user://event_queue", File.WRITE)
 	f.store_var(state_config['event_queue'])
@@ -192,10 +192,10 @@ func request_init():
 		'os_version': os_version,
 		'sdk_version': sdk_version
 	}
-	
+
 	# generate session id
 	generate_new_session_id()
-	
+
 	# Refreshing url_init since game key might have been changed externally
 	url_init = "/v2/" + game_key + "/init"
 	#var queryString = requests.query_string_from_dict(init_payload)
@@ -211,13 +211,13 @@ func request_init():
 	#status_code = None
 	var response_dict
 	var status_code
-		
+
 	if DEBUG:
 		print(base_url)
 		print(url_init)
 		print(init_payload_json)
 		print(Marshalls.raw_to_base64(hmac_sha256(init_payload_json, secret_key)))
-		
+
 	#try:
 	var err = requests.connect_to_host(base_url,80)
 
@@ -239,7 +239,7 @@ func request_init():
 		requests.poll()
 		print("Requesting..")
 		OS.delay_msec(500)
-	
+
 	if requests.has_response():
 		# If there is a response..
 		headers = requests.get_response_headers_as_dictionary() # Get response headers
@@ -275,7 +275,7 @@ func request_init():
 		print("bytes got: ", rb.size())
 		var text = rb.get_string_from_ascii()
 		print("Text: ", text)
-		
+
 	#status_code = init_response.status_code
 	status_code = requests.get_response_code()
 	#try:
@@ -292,7 +292,7 @@ func request_init():
 #    if status_code is null:
 #        a = ""
 #    else a = "Returned: " + str(status_code) + " response code."
-	
+
 	var response_string = (status_code)
 
 	if status_code == 401:
@@ -368,7 +368,7 @@ func submit_events():
 		requests.poll()
 		print("Requesting..")
 		OS.delay_msec(500)
-	
+
 	if requests.has_response():
 		# If there is a response..
 		headers = requests.get_response_headers_as_dictionary() # Get response headers
@@ -528,7 +528,7 @@ func get_test_design_event(event_id, value):
 #    if isinstance(value, (int, long, float)):
 #        event_dict['value'] = value
 	return event_dict
-	
+
 static func merge_dir(target, patch):
     for key in patch:
         target[key] = patch[key]
@@ -543,7 +543,7 @@ static func merge_dir2(target, patch):
                 target[key] = patch[key]
         else:
             target[key] = patch[key]
-			
+
 func get_gzip_string(string_for_gzip):
     var f = File.new()
 
@@ -630,7 +630,7 @@ func post_to_log(message):
 func hmac_sha256(message, key):
 	var x = 0
 	var k
-	
+
 	if key.length() <= 64:
 		k = key.to_utf8()
 
@@ -646,54 +646,54 @@ func hmac_sha256(message, key):
 	var o = "".to_utf8()
 	var m = message.to_utf8()
 	var s = File.new()
-			
+
 	while x < 64:
 		o.append(k[x] ^ 0x5c)
 		i.append(k[x] ^ 0x36)
 		x += 1
-		
+
 	var inner = i + m
-	
+
 	s.open("user://temp", File.WRITE)
 	s.store_buffer(inner)
 	s.close()
 	var z = s.get_sha256("user://temp")
-	
+
 	var outer = "".to_utf8()
-	
+
 	x = 0
 	while x < 64:
 		outer.append(convert_hex_to_dec(z.substr(x, 2)))
 		x += 2
-	
+
 	outer = o + outer
-	
+
 	s.open("user://temp", File.WRITE)
 	s.store_buffer(outer)
 	s.close()
-	
+
 	z = s.get_sha256("user://temp")
-	
+
 	outer = "".to_utf8()
-	
+
 	x = 0
 	while x < 64:
 		outer.append(convert_hex_to_dec(z.substr(x, 2)))
 		x += 2
-	
+
 	var mm = outer
 	return outer
-	
+
 func convert_hex_to_dec(h):
 	var c = "0123456789ABCDEF"
-	
+
 	h = h.to_upper()
-	
+
 	var r = h.right(1)
 	var l = h.left(1)
-	
+
 	var b0 = c.find(r)
 	var b1 = c.find(l) * 16
-	
+
 	var x = b1 + b0
 	return x
