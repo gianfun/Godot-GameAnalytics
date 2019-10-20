@@ -87,11 +87,11 @@ func start_session():
 	state_config['session_id'] = UUID.v4()
 	state_config['session_start'] = OS.get_unix_time_from_datetime(OS.get_datetime())
 
-	log_info("Started session with id: " + state_config['session_id'])
+	log_info("Started session with id: " + str(state_config['session_id']))
 	_init_request()
 
 func stop_session():
-	log_info("Stopped session with id: " + state_config['session_id'])
+	log_info("Stopped session with id: " + str(state_config['session_id']))
 
 	var client_ts = OS.get_unix_time_from_datetime(OS.get_datetime())
 	queue_event({
