@@ -68,71 +68,9 @@ var state_config = {
 	# event queue - contains a list of event dictionaries to be JSON encoded
 	'event_queue': []
 }
+
 var requests = HTTPClient.new()
 
-func _ready():
-#	# For some reason, "Windows" is not recognized by GameAnaytics. Guess they only expect mobile platforms
-	if platform == "Windows":
-		platform = "ios"
-#
-	if os_version == "Windows":
-		os_version = "ios 8.2"
-	# 1. init call
-	#init_response, init_response_code = request_init()
-#	var init_response = request_init()
-#	var init_response_code = init_response
-
-	# calculate client_ts offset from server
-	#update_client_ts_offset(init_response['server_ts'])
-
-#	post_to_log("Init call successful !")
-#	print_verbose("Init response: " + str(init_response))
-#
-#	# 2. send events (only one business event)
-#	if !state_config['enabled']:
-#		post_to_log("SDK disabled. Will not continue event submit.")
-#		#sys.exit()
-
-	# generate session id
-	#generate_new_session_id()
-	#annotate_event_with_default_values()
-#	add_to_event_queue(get_test_design_event("player:new_level", 1))
-#	add_to_event_queue(get_test_design_event("player:new_level", 2))
-#	add_to_event_queue(get_test_design_event("player:played_video", 3))
-#
-#	returned = submit_events()
-
-#	# add session start event (user event)
-#	add_to_event_queue(get_test_user_event())
-#
-#	# add business event
-#	add_to_event_queue(get_test_business_event_dict())
-#
-#	# add design events
-#	add_to_event_queue(get_test_design_event("player:death:shotgun", 0))
-#	add_to_event_queue(get_test_design_event("player:kill:blue_yeti", 23.9))
-#	add_to_event_queue(get_test_design_event("player:kill:black_yeti", 90.3))
-#
-#	# submit the event queue and clear it
-#	returned = submit_events()
-##    response_data = returned.x
-##    response_code = returned.y
-#
-#	# add more design events
-#	add_to_event_queue(get_test_design_event("player:kill:black_yeti", 90.9))
-#	add_to_event_queue(get_test_design_event("player:death:black_yeti", 0))
-#	add_to_event_queue(get_test_design_event("player:kill:golden_goose", 21.5))
-#
-#	# end session: add session end event
-#	add_to_event_queue(get_test_session_end_event(200))
-#
-#	# submit the event queue and clear it
-#	returned = submit_events()
-#    response_data = returned.x
-#    response_code = returned.y
-
-	#sys.exit()
-	pass
 
 
 # adding an event to the queue for later submit
@@ -445,25 +383,12 @@ func generate_new_session_id():
 
 func update_client_ts_offset(server_ts):
 	# calculate client_ts using offset from server time
-	#datetime.utcnow()
-	var now_ts = OS.get_unix_time_from_datetime(OS.get_datetime())
-#    var client_ts = calendar.timegm(now_ts.timetuple())
-	var client_ts = now_ts
+	var client_ts = OS.get_unix_time_from_datetime(OS.get_datetime())
 	var offset = client_ts - server_ts
-# --> Verificar
-	#offset = 0
 
-	# if too small difference then ignore
-	if offset < 10:
-		state_config['client_ts_offset'] = 0
-	else:
-		state_config['client_ts_offset'] = offset
+	# If the difference is too small, ignore it
+	state_config['client_ts_offset'] = 0 if offset < 10 else offset
 	print_verbose('Client TS offset calculated to: ' + str(offset))
-
-
-#func hmac_hash_with_secret(message, key):
-#	#requests.
-#    return utf8_to_base64(hmac.new(key, message, hashlib.sha256))
 
 
 func get_test_business_event_dict():
@@ -500,26 +425,15 @@ func get_test_design_event(event_id, value):
 		'event_id': event_id,
 		'value': value
 	}
-	merge_dir(event_dict, annotate_event_with_default_values())
+	dict_assign(event_dict, annotate_event_with_default_values())
 	#annotate_event_with_default_values()
 #    if isinstance(value, (int, long, float)):
 #        event_dict['value'] = value
 	return event_dict
 
-static func merge_dir(target, patch):
+static func dict_assign(target, patch):
     for key in patch:
         target[key] = patch[key]
-
-static func merge_dir2(target, patch):
-    for key in patch:
-        if target.has(key):
-            var tv = target[key]
-            if typeof(tv) == TYPE_DICTIONARY:
-                merge_dir(tv, patch[key])
-            else:
-                target[key] = patch[key]
-        else:
-            target[key] = patch[key]
 
 # add default annotations (will alter the dict by reference)
 #func annotate_event_with_default_values(event_dict):
@@ -631,3 +545,67 @@ func hmac_sha256(message, key):
 	var outer_hash = pool_byte_array_from_hex(sha256(outer_key + inner_hash))
 
 	return outer_hash
+
+
+
+	#	# For some reason, "Windows" is not recognized by GameAnaytics. Guess they only expect mobile platforms
+	if platform == "Windows":
+		platform = "ios"
+#
+	if os_version == "Windows":
+		os_version = "ios 8.2"
+	# 1. init call
+	#init_response, init_response_code = request_init()
+#	var init_response = request_init()
+#	var init_response_code = init_response
+
+	# calculate client_ts offset from server
+	#update_client_ts_offset(init_response['server_ts'])
+
+#	post_to_log("Init call successful !")
+#	print_verbose("Init response: " + str(init_response))
+#
+#	# 2. send events (only one business event)
+#	if !state_config['enabled']:
+#		post_to_log("SDK disabled. Will not continue event submit.")
+#		#sys.exit()
+
+	# generate session id
+	#generate_new_session_id()
+	#annotate_event_with_default_values()
+#	add_to_event_queue(get_test_design_event("player:new_level", 1))
+#	add_to_event_queue(get_test_design_event("player:new_level", 2))
+#	add_to_event_queue(get_test_design_event("player:played_video", 3))
+#
+#	returned = submit_events()
+
+#	# add session start event (user event)
+#	add_to_event_queue(get_test_user_event())
+#
+#	# add business event
+#	add_to_event_queue(get_test_business_event_dict())
+#
+#	# add design events
+#	add_to_event_queue(get_test_design_event("player:death:shotgun", 0))
+#	add_to_event_queue(get_test_design_event("player:kill:blue_yeti", 23.9))
+#	add_to_event_queue(get_test_design_event("player:kill:black_yeti", 90.3))
+#
+#	# submit the event queue and clear it
+#	returned = submit_events()
+##    response_data = returned.x
+##    response_code = returned.y
+#
+#	# add more design events
+#	add_to_event_queue(get_test_design_event("player:kill:black_yeti", 90.9))
+#	add_to_event_queue(get_test_design_event("player:death:black_yeti", 0))
+#	add_to_event_queue(get_test_design_event("player:kill:golden_goose", 21.5))
+#
+#	# end session: add session end event
+#	add_to_event_queue(get_test_session_end_event(200))
+#
+#	# submit the event queue and clear it
+#	returned = submit_events()
+#    response_data = returned.x
+#    response_code = returned.y
+
+	#sys.exit()
