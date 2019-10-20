@@ -15,7 +15,7 @@ Add this as a AutoLoad script.
   # Queue events, when we have enough events, we will submit them to the server
 	GameAnalytics.queue_event(...event)
 
-  # Stop the session when the user presses the home or back button
+  # Stop the session when the user presses the home or back button (TODO: We could probably do this automatically)
 	GameAnalytics.stop_session()
 ```
 

@@ -32,9 +32,6 @@ var state_config = {
 	'event_queue': []
 }
 
-var http_client = HTTPClient.new()
-
-
 func _http_free_request(request):
 	remove_child(request)
 	request.queue_free()
@@ -106,9 +103,9 @@ func stop_session():
 	state_config['session_start'] = null
 
 
-func _notification(what):
-    if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
-        stop_session()
+# func _notification(what):
+#     if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+#         stop_session()
 
 func _process(delta):
 	if state_config['event_queue'].size() >= event_queue_max_events:
