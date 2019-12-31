@@ -4,7 +4,17 @@ extends Node
 # Adapted from REST_v2_example.py by Cristiano Reis Monteiro <cristianomonteiro@gmail.com> Abr/2018
 
 
-const UUID = preload("uuid.gd")
+const UUID = preload("uuid/uuid.gd")
+
+# Platform remaps
+const PLATFORMS = {
+	'Windows': 'windows',
+	'X11': 'linux',
+	'OSX': 'mac_osx',
+	'Android': 'android',
+	'iOS': 'ios',
+	'HTML5': 'webgl',
+}
 
 const ssl_validate_domain = true
 # Number of events to hold before flushing the event queue
@@ -224,7 +234,7 @@ static func _dict_assign(target, patch):
 
 
 func _get_os_version():
-	var platform = OS.get_name().to_lower()
+	var platform = PLATFORMS[OS.get_name()]
 	# Get version number on Android. Need something similar for iOS
 	if platform == "android":
 		var output = []

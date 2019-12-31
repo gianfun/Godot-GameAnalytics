@@ -2,9 +2,9 @@
 
 Based of the code from Cristiano Reis Monteiro at https://github.com/Montecri/Godot-GameAnalytics
 
-Add this as a AutoLoad script.
+The plugin automatically adds the GameAnalytics as an AutoLoad script.
 
-```python
+```GDScript
   # configure the keys
 	GameAnalytics.game_key = "asd123"
 	GameAnalytics.secret_key = "abccsd"
