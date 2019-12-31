@@ -243,18 +243,6 @@ func _get_os_version():
 		# Trimming new line char at the end
 		output[0] = output[0].substr(0, output[0].length() - 1)
 		return platform + " " + output[0]
-	elif platform == 'windows':
-		manufacturer = 'microsoft'
-		var output = []
-		OS.execute('systeminfo', [], true, output)
-		if not output.empty():
-			var rg = RegEx.new()
-			rg.compile("OS\\sVersion:\\s+(.*)")
-			var result = rg.search(output[0])
-			if result:
-				# Output example: `10.0.18362 N/A Build 18362`
-				os_version = result.get_string(1).split(' ')[0]
-		os_version = platform + ' ' + os_version
 	else:
 		return OS.get_name().to_lower()
 
