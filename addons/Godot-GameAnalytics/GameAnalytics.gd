@@ -6,6 +6,16 @@ extends Node
 
 const UUID = preload("uuid/uuid.gd")
 
+# Platform remaps
+const PLATFORMS = {
+	'Windows': 'windows',
+	'X11': 'linux',
+	'OSX': 'mac_osx',
+	'Android': 'android',
+	'iOS': 'ios',
+	'HTML5': 'webgl',
+}
+
 const ssl_validate_domain = true
 # Number of events to hold before flushing the event queue
 const event_queue_max_events = 64
@@ -224,7 +234,7 @@ static func _dict_assign(target, patch):
 
 
 func _get_os_version():
-	var platform = OS.get_name().to_lower()
+	var platform = PLATFORMS[OS.get_name()]
 	# Get version number on Android. Need something similar for iOS
 	if platform == "android":
 		var output = []
@@ -233,6 +243,18 @@ func _get_os_version():
 		# Trimming new line char at the end
 		output[0] = output[0].substr(0, output[0].length() - 1)
 		return platform + " " + output[0]
+	elif platform == 'windows':
+		manufacturer = 'microsoft'
+		var output = []
+		OS.execute('systeminfo', [], true, output)
+		if not output.empty():
+			var rg = RegEx.new()
+			rg.compile("OS\\sVersion:\\s+(.*)")
+			var result = rg.search(output[0])
+			if result:
+				# Output example: `10.0.18362 N/A Build 18362`
+				os_version = result.get_string(1).split(' ')[0]
+		os_version = platform + ' ' + os_version
 	else:
 		return OS.get_name().to_lower()
 
