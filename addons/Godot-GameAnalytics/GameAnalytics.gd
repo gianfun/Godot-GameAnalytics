@@ -4,7 +4,7 @@ extends Node
 # Adapted from REST_v2_example.py by Cristiano Reis Monteiro <cristianomonteiro@gmail.com> Abr/2018
 
 
-const UUID = preload("uuid.gd")
+const UUID = preload("uuid/uuid.gd")
 
 const ssl_validate_domain = true
 # Number of events to hold before flushing the event queue
