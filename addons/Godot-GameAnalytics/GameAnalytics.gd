@@ -258,11 +258,11 @@ func _get_os_version():
 		output[0] = output[0].substr(0, output[0].length() - 1)
 		return platform + " " + output[0]
 	else:
-		return OS.get_name().to_lower()
+		return platform + ' '
 
 func _get_default_annotations():
 	# For some reason GameAnalytics only accepts lower case. Weird but happened to me
-	var platform = OS.get_name().to_lower()
+	var platform = PLATFORMS[OS.get_name()]
 	var os_version = _get_os_version()
 	var sdk_version = 'rest api v2'
 	var device = OS.get_model_name().to_lower()
