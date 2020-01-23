@@ -53,7 +53,9 @@ var state_config = {
 	# set if SDK is disabled or not - default enabled
 	'enabled': true,
 	# event queue - contains a list of event dictionaries to be JSON encoded
-	'event_queue': []
+	'event_queue': [],
+	# dictionary of currently running progression events
+	'ongoing_progression_event_info': {}
 }
 
 func _http_free_request(request):
@@ -126,10 +128,101 @@ func stop_session():
 	state_config['session_id'] = null
 	state_config['session_start'] = null
 
+# Progression Events
+func start_progression(event_id):
+	if _progression_event_has_errors('Start', event_id):
+		return
 
-# func _notification(what):
-#     if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
-#         stop_session()
+	var event_info = _progression_get_event_info(event_id)
+	if event_info.running:
+		fail_progression(event_id)
+		
+	event_info.running = true
+	state_config.ongoing_progression_event_info[event_id] = event_info
+	
+	_generic_progression_event('Start', event_id)
+	
+func fail_progression(event_id, score = null):
+	if _progression_event_has_errors('Fail', event_id):
+		return
+
+	var event_info = _progression_get_event_info(event_id)
+	if not event_info.running:
+		start_progression(event_id)
+		
+	event_info.running = false
+	event_info.counter += 1
+	state_config.ongoing_progression_event_info[event_id] = event_info
+	_generic_progression_event('Fail', event_id, score)
+	
+func complete_progression(event_id, score = null):
+	if _progression_event_has_errors('Complete', event_id):
+		return
+
+	var event_info = _progression_get_event_info(event_id)
+	if not event_info.running:
+		start_progression(event_id)
+		
+	event_info.running = false
+	event_info.counter += 1
+	state_config.ongoing_progression_event_info[event_id] = event_info
+	
+	_generic_progression_event('Complete', event_id, score)
+	state_config.ongoing_progression_event_info.erase(event_id)
+	
+func _generic_progression_event(progression_type, event_id, score = null):
+	assert(progression_type in ['Start', 'Fail', 'Complete'])
+
+	var event_info = _progression_get_event_info(event_id)
+	var event = {
+		'category': 'progression',
+		'event_id': progression_type + ':' + event_id,
+	}
+	
+	if progression_type != 'Start':
+		event['attempt_num'] = int(event_info.counter)
+		if score != null and typeof(score) == TYPE_INT:
+			event['score'] = int(score)
+		
+	queue_event(event)
+	
+func _progression_get_event_info(event_id):
+	var event_info
+	if state_config.ongoing_progression_event_info.has(event_id):
+		event_info = state_config.ongoing_progression_event_info[event_id]
+	else:
+		event_info = {
+			'counter': 0,
+			'event_id': event_id,
+			'running': false
+		}
+	return event_info
+	
+func _progression_event_id_already_prefixed(event_id):
+	return event_id.find("Start") == 0 or event_id.find("Fail") == 0 or event_id.find("Complete") == 0
+
+func _progression_event_has_errors(progression_type, event_id):
+	var has_errors = false
+	if _progression_event_id_already_prefixed(event_id):
+		push_warning("Tried calling Progression " + progression_type + " but event id already starts with a progression status")
+		has_errors = true
+	
+	if not progression_type in ['Start', 'Fail', 'Complete']:
+		push_warning("Unknown progression_type '" + progression_type + "' for progression event '" + event_id + "'")
+		has_errors = true
+
+	if event_id.split(':').size() > 3:
+		push_warning("Too many dividers ':' in event_id '" + event_id + "'")
+		has_errors = true
+
+	return has_errors
+# TODO: Send a fail event if we boot the app and have events in ongoing_progression_event_info
+
+
+
+
+
+
 
 func _process(delta):
 	if state_config['event_queue'].size() >= event_queue_max_events:
