@@ -3,6 +3,7 @@ extends Node
 # Cross-platform. Should work in every platform supported by Godot
 # Adapted from REST_v2_example.py by Cristiano Reis Monteiro <cristianomonteiro@gmail.com> Abr/2018
 
+const DEVELOPMENT = true
 
 const UUID = preload("uuid/uuid.gd")
 
@@ -22,11 +23,24 @@ const event_queue_max_events = 64
 
 
 # Game Keys
-var game_key
-var secret_key
+var game_key setget set_game_key, get_game_key
+var secret_key setget set_secret_key, get_secret_key
 
 # sandbox API urls
-var base_url = "http://sandbox-api.gameanalytics.com" # "http://api.gameanalytics.com"
+var base_url = "http://sandbox-api.gameanalytics.com" if DEVELOPMENT else "http://api.gameanalytics.com" 
+
+
+func set_game_key(new_game_key):
+	game_key = new_game_key 
+
+func get_game_key():
+	return game_key if not DEVELOPMENT else "5c6bcb5402204249437fb5a7a80a4959"
+
+func set_secret_key(new_secret_key):
+	secret_key = new_secret_key
+
+func get_secret_key():
+	return secret_key if not DEVELOPMENT else "16813a12f718bc5c620f56944e1abc3ea13ccbac"
 
 # global state to track changes when code is running
 var state_config = {
@@ -76,7 +90,7 @@ func _http_perform_request(endpoint, body, response_handler):
 	var url = base_url + endpoint
 	var json_payload = to_json(body)
 	var headers = PoolStringArray([
-		"Authorization: " + Marshalls.raw_to_base64(hmac_sha256(json_payload, secret_key)),
+		"Authorization: " + Marshalls.raw_to_base64(hmac_sha256(json_payload, self.secret_key)),
 		"Content-Type: application/json"
 	])
 
@@ -153,7 +167,7 @@ func _init_request():
 		'sdk_version': default_annotations['sdk_version']
 	}
 
-	var endpoint = "/v2/" + game_key + "/init"
+	var endpoint = "/v2/" + self.game_key + "/init"
 	_http_perform_request(endpoint, init_payload, "_handle_init_response")
 
 
@@ -167,7 +181,7 @@ func _handle_submit_events_response(response_code, body):
 	log_info("AYY: " + str(body))
 
 func _submit_events():
-	var endpoint = "/v2/" + game_key + "/events"
+	var endpoint = "/v2/" + self.game_key + "/events"
 	_http_perform_request(endpoint, state_config['event_queue'], "_handle_submit_events_response")
 	# It doesen't really matter if the request succeded, we are not going to send the events again
 	state_config['event_queue'] = []
