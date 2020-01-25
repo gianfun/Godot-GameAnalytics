@@ -5,6 +5,8 @@ extends Node
 
 const DEVELOPMENT = true
 
+const MAX_ERROR_MSG_LENGTH = 8192
+
 const UUID = preload("uuid/uuid.gd")
 
 # Platform remaps
@@ -245,6 +247,23 @@ func design_event(event_id, value = null):
 	}
 	if value != null and typeof(value) == TYPE_INT:
 		event['value'] = int(value)
+	
+	queue_event(event)
+	
+# Error Events
+enum ErrorSeverity { DEBUG, INFO, WARNING, ERROR, CRITICAL }
+func error_event(severity, message):
+	if severity < 0 or severity > ErrorSeverity.size():
+		push_warning("Analytics: Severity " + str(severity) + " does not exist")
+		return
+	var severity_name = ErrorSeverity.keys()[severity].to_lower()
+	if message.length() > MAX_ERROR_MSG_LENGTH:
+		push_warning("Analytics: Error with severity " + severity_name + " is too long. Size: " + str(message.length()) + " but max allowed is " + str(MAX_ERROR_MSG_LENGTH))
+	var event = {
+		'category': 'error',
+		'severity': severity_name,
+		'message': message
+	}
 	
 	queue_event(event)
 
