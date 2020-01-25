@@ -218,6 +218,25 @@ func _progression_event_has_errors(progression_type, event_id):
 	return has_errors
 # TODO: Send a fail event if we boot the app and have events in ongoing_progression_event_info
 
+# Resource Events
+func resource_sink(virtual_currency, item_type, item_id, amount):
+	var event = {
+		'category': 'resource',
+		'event_id': "Sink:" + virtual_currency + ":" + item_type + ":" + item_id,
+		'amount': amount
+	}
+	
+	queue_event(event)
+	
+func resource_source(virtual_currency, item_type, item_id, amount):
+	var event = {
+		'category': 'resource',
+		'event_id': "Source:" + virtual_currency + ":" + item_type + ":" + item_id,
+		'amount': amount
+	}
+	
+	queue_event(event)
+	
 # Design Events
 func design_event(event_id, value = null):
 	var event = {
