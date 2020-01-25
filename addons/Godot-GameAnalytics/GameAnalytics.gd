@@ -218,7 +218,16 @@ func _progression_event_has_errors(progression_type, event_id):
 	return has_errors
 # TODO: Send a fail event if we boot the app and have events in ongoing_progression_event_info
 
-
+# Design Events
+func design_event(event_id, value = null):
+	var event = {
+		'category': 'design',
+		'event_id': event_id,
+	}
+	if value != null and typeof(value) == TYPE_INT:
+		event['value'] = int(value)
+	
+	queue_event(event)
 
 
 
