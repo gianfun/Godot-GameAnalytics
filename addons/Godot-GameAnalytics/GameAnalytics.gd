@@ -28,6 +28,9 @@ const event_queue_max_events = 64
 var game_key setget set_game_key, get_game_key
 var secret_key setget set_secret_key, get_secret_key
 
+var build_version = null
+
+
 # sandbox API urls
 var base_url = "http://sandbox-api.gameanalytics.com" if DEVELOPMENT else "http://api.gameanalytics.com" 
 
@@ -408,7 +411,6 @@ func _get_default_annotations():
 	var sdk_version = 'rest api v2'
 	var device = OS.get_model_name().to_lower()
 	var manufacturer = OS.get_name().to_lower()
-	var build_version = 'alpha 0.0.1'
 	var engine_version = Engine.get_version_info()['string']
 
 	var ts_offset = 0 if not state_config.has('client_ts_offset') else state_config['client_ts_offset']
@@ -445,6 +447,9 @@ func _get_default_annotations():
 		#'jailbroken                                # (required: No - send if true)
 		#'engine_version': engine_version           # (required: No - send if set by an engine)
 	}
+	if build_version:
+		default_annotations['build'] = build_version
+		
 	return default_annotations
 
 
