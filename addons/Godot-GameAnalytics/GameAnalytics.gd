@@ -316,9 +316,10 @@ func _init_request():
 
 func _handle_submit_events_response(response_code, body):
 	if response_code < 200 or response_code >= 400:
+		log_info("Submit Error: " + str(body))
 		return
 
-	log_info("AYY: " + str(body))
+	log_info("Events submitted. Response: " + str(body))
 
 func _submit_events():
 	var endpoint = "/v2/" + self.game_key + "/events"
